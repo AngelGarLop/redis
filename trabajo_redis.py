@@ -73,37 +73,37 @@ for clave in baseDatosRedis.keys('semaforo_*'):
 print(baseDatosRedis.keys('semaforo_*'))
 
 print("14 - Crear una estructura en JSON de array de los datos que vayais a almacenar")
-import json
 datos = [
-    {"id": 1, "nombre": "semaforo_1", "ubicacion": "calle a"},
-    {"id": 2, "nombre": "semaforo_2", "ubicacion": "calle b"}
+    { "nombre": "semaforo_1", "ubicacion": "calle a"},
+    {"nombre": "semaforo_2", "ubicacion": "calle b"}
 ]
-baseDatosRedis.set('datos_json', json.dumps(datos))
-print(baseDatosRedis.get('datos_json'))
+baseDatosRedis.json().set('datos_json',"$", datos)
+print(baseDatosRedis.json().get('datos_json'))
 
 print("15 - Realizar un filtro por cada atributo de la estructura JSON anterior")
-datos_json = json.loads(baseDatosRedis.get('datos_json'))
-filtro_id = [d for d in datos_json if d['id'] == 1]
-filtro_nombre = [d for d in datos_json if d['nombre'] == 'semaforo_1']
-filtro_ubicacion = [d for d in datos_json if d['ubicacion'] == 'calle a']
-print(filtro_id, filtro_nombre, filtro_ubicacion)
+filtro_nombre = baseDatosRedis.json().get("datos_json", '$[?(@.nombre == "semaforo_1")]')
+filtro_ubicacion =baseDatosRedis.json().get("datos_json", '$[?(@.ubicacion == "calle b")]')
+print(filtro_nombre, filtro_ubicacion)
 
 print("16 - Crear una lista en Redis")
-baseDatosRedis.rpush('lista_semaforos', 'semaforo_1', 'semaforo_2')
-print(baseDatosRedis.lrange('lista_semaforos', 0, -1))
+baseDatosRedis.lpush("colores", "rojo") 
+baseDatosRedis.lpush("colores", "naranja")
+baseDatosRedis.lpush("colores", "verde") 
+
+print(baseDatosRedis.lrange('colores', 0, -1))
 
 print("17 - Obtener elementos de una lista con un filtro en concreto")
-lista_semaforos = baseDatosRedis.lrange('lista_semaforos', 0, -1)
+lista_semaforos = baseDatosRedis.lrange('colores', 0, -1)
 filtro_lista = [item for item in lista_semaforos if '1' in item]
 print(filtro_lista)
 
 print("18 - Crear y obtener datos usando Set y Hashes en Redis")
 # Set
-baseDatosRedis.sadd('set_semaforos', 'semaforo_1', 'semaforo_2')
-print(baseDatosRedis.smembers('set_semaforos'))
+baseDatosRedis.sadd('set_colores', 'rojo', 'naranja','verde')
+print(baseDatosRedis.smembers('set_colores'))
 
 # Hashes
-baseDatosRedis.hset('hash_semaforo_1', mapping={'ubicacion': 'calle a', 'estado': 'verde'})
+baseDatosRedis.hset('hash_semaforo_1', mapping={'ubicacion': 'calle a', 'color': 'verde'})
 print(baseDatosRedis.hgetall('hash_semaforo_1'))
 
 
